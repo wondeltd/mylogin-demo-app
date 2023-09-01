@@ -49,9 +49,9 @@ configured valet to use a different top level domain
 
 ## Configure MyLogin
 
-Get your `client_id` from the [MyLogin Developer Portal](https://mylogin.com/developer/login)
+Get your `client_id` from the [MyLogin Developer Portal](https://mylogin.com/developer/login) and store it in `.env` `MYLOGIN_CLIENT_ID`
 
 Generate a secret and store it in `.env` `MYLOGIN_CLIENT_SECRET`
 
-Generate a redirect URI and store it in `.env` `MYLOGIN_CLIENT_SECRET`, this will likely need to
+Generate a redirect URI and store it in `.env` `MYLOGIN_REDIRECT_URI`, this will likely need to
 be https://mylogin-demo-app.test/callback
