@@ -86,6 +86,6 @@ class AuthController extends Controller
 
         $request->session()->regenerateToken();
 
-        return to_route('login');
+        return redirect()->away(config('services.mylogin.url') . '/oauth/logout?client_id=' . config('services.mylogin.client_id'));
     }
 }
