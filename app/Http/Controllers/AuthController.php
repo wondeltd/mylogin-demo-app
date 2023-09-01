@@ -15,7 +15,9 @@ class AuthController extends Controller
 {
     public function loginPage(): View
     {
-        return view('auth.login');
+        $isLogoutRedirect = request()->has('is_logout_redirect');
+
+        return view('auth.login')->with(['isLogoutRedirect' => $isLogoutRedirect]);
     }
 
     public function redirect()
