@@ -45,6 +45,10 @@ class AuthController extends Controller
 
         $details = $response->json();
 
+        if (! $response->ok() || empty($details['access_token'])) {
+            return to_route("login");
+        }
+
         $userResponse = Http::withHeaders([
             'Authorization' => 'Bearer ' . $details['access_token']
         ])
