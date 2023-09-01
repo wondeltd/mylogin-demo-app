@@ -30,6 +30,12 @@ Create tables in the database
 php artisan migrate
 ```
 
+Bundle the front-end assets
+
+```shell
+npm run build
+```
+
 ## Accessing the Web Interface
 
 If you have Laravel Valet available, you can link the app so it's available at a friendly domain locally
