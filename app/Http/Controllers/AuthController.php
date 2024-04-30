@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\SSOProtocol;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,14 +23,13 @@ class AuthController extends Controller
 
     public function redirect()
     {
-
         $query = http_build_query([
             'client_id' => config('services.mylogin.client_id'),
             'redirect_uri' => config('services.mylogin.redirect_uri'),
             'response_type' => 'code',
         ]);
 
-        $url = config('services.mylogin.url') . "/oauth/authorize?" . $query;
+        $url = config('services.mylogin.url').'/oauth/authorize?'.$query;
 
         return redirect($url);
     }
@@ -37,42 +37,43 @@ class AuthController extends Controller
     public function callback(Request $request)
     {
         $response = Http::withHeaders([
-            'Authorization' => 'Basic ' . base64_encode(config('services.mylogin.client_id') . ':' . config('services.mylogin.client_secret'))
+            'Authorization' => 'Basic '.base64_encode(config('services.mylogin.client_id').':'.config('services.mylogin.client_secret')),
         ])
-        ->post(config('services.mylogin.url') . '/oauth/token', [
-            'grant_type' => 'authorization_code',
-            'code' => $request->code,
-            'redirect_uri' => config('services.mylogin.redirect_uri')
-        ]);
+            ->post(config('services.mylogin.url').'/oauth/token', [
+                'grant_type' => 'authorization_code',
+                'code' => $request->code,
+                'redirect_uri' => config('services.mylogin.redirect_uri'),
+            ]);
 
         $details = $response->json();
 
         if (! $response->ok() || empty($details['access_token'])) {
-            return to_route("login");
+            return to_route('login');
         }
 
         $userResponse = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $details['access_token']
+            'Authorization' => 'Bearer '.$details['access_token'],
         ])
-            ->get(config('services.mylogin.url') . '/api/user')
-        ->json();
+            ->get(config('services.mylogin.url').'/api/user')
+            ->json();
 
         if ($userResponse) {
-            $user = User::where('email', $userResponse['data']['email'])->first();
 
-            if (! $user) {
-                $user = User::create([
-                    'name' => $userResponse['data']['first_name'] . ' ' . $userResponse['data']['last_name'],
-                    'email' => $userResponse['data']['email'],
-                    'password' => Hash::make(Str::random(48))
-                ]);
-            }
+            $user = User::firstOrCreate([
+                'mylogin_id' => $userResponse['data']['id'],
+            ], [
+                'name' => $userResponse['data']['first_name'].' '.$userResponse['data']['last_name'],
+                'email' => $userResponse['data']['email'],
+                'password' => Hash::make(Str::random(48)),
+            ]);
 
             $user->update([
                 'access_token' => $details['access_token'],
                 'refresh_token' => $details['refresh_token'],
             ]);
+
             auth()->login($user);
+            session()->replace(['last_login_protocol' => SSOProtocol::OAuth->value]);
         }
 
         return to_route('dashboard');
@@ -86,6 +87,6 @@ class AuthController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect()->away(config('services.mylogin.url') . '/oauth/logout?client_id=' . config('services.mylogin.client_id'));
+        return redirect()->away(config('services.mylogin.url').'/oauth/logout?client_id='.config('services.mylogin.client_id'));
     }
 }
