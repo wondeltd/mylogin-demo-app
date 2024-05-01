@@ -11,6 +11,10 @@ export default {
 
     theme: {
         extend: {
+            colors: {
+                'mylogin-green-light': '#00D37F',
+                'mylogin-green-dark': '#014751'
+            },
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
