@@ -25,9 +25,7 @@
     <script>
         async function submitProtocol(protocol)
         {
-            if (protocol === 'oauth') {
-                window.location.href = "/redirect";
-            }
+            window.location.href = "/redirect?protocol=" + protocol;
         }
     </script>
 </x-guest-layout>
