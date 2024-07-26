@@ -8,7 +8,7 @@
                     <label for="oauth" class="block cursor-pointer select-none rounded-xl p-2 text-center peer-checked:bg-mylogin-green-dark peer-checked:font-bold peer-checked:text-white">OAuth</label>
                 </div>
 
-                <div class="hidden">
+                <div>
                     <input type="radio" name="option" id="saml" value="saml" class="peer hidden" x-model="protocol" checked />
                     <label for="saml" class="block cursor-pointer select-none rounded-xl p-2 text-center peer-checked:bg-mylogin-green-dark peer-checked:font-bold peer-checked:text-white">SAML</label>
                 </div>
