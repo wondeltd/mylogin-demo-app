@@ -89,4 +89,14 @@ class AuthController extends Controller
 
         return redirect()->away(config('services.mylogin.url').'/oauth/logout?client_id='.config('services.mylogin.client_id'));
     }
+
+    private function isSamlSession(): bool
+    {
+        return session()->get('last_login_protocol') === SSOProtocol::SAML->value;
+    }
+
+    private function isOauthSession(): bool
+    {
+        return session()->get('last_login_protocol') === SSOProtocol::OAuth->value;
+    }
 }
