@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Slides\Saml2\Models\Tenant;
 
 class AuthController extends Controller
 {
@@ -21,8 +22,12 @@ class AuthController extends Controller
         return view('auth.login')->with(['isLogoutRedirect' => $isLogoutRedirect]);
     }
 
-    public function redirect()
+    public function redirect(Request $request): RedirectResponse
     {
+        if ($request->get('protocol') === SSOProtocol::SAML->value) {
+            return to_route('saml.login', ['uuid' => Tenant::firstOrFail()->uuid, 'returnTo' => route('dashboard')]);
+        }
+
         $query = http_build_query([
             'client_id' => config('services.mylogin.client_id'),
             'redirect_uri' => config('services.mylogin.redirect_uri'),
