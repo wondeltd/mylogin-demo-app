@@ -88,6 +88,10 @@ class AuthController extends Controller
     {
         Auth::guard('web')->logout();
 
+        if ($this->isSamlSession()) {
+            return to_route('saml.logout', Tenant::firstOrFail()->uuid);
+        }
+
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();
