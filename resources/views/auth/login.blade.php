@@ -2,13 +2,13 @@
     <div class="text-center p-4" x-data="{ protocol: 'oauth' }" >
 
         <div class="grid w-full place-items-center pb-6">
-            <div class="grid grid-cols-1 gap-2 rounded-xl bg-gray-200 p-2">
+            <div class="grid grid-cols-2 gap-2 rounded-xl bg-gray-200 p-2">
                 <div>
                     <input type="radio" name="option" id="oauth" value="oauth" class="peer hidden" x-model="protocol" />
                     <label for="oauth" class="block cursor-pointer select-none rounded-xl p-2 text-center peer-checked:bg-mylogin-green-dark peer-checked:font-bold peer-checked:text-white">OAuth</label>
                 </div>
 
-                <div class="hidden">
+                <div>
                     <input type="radio" name="option" id="saml" value="saml" class="peer hidden" x-model="protocol" checked />
                     <label for="saml" class="block cursor-pointer select-none rounded-xl p-2 text-center peer-checked:bg-mylogin-green-dark peer-checked:font-bold peer-checked:text-white">SAML</label>
                 </div>
@@ -25,9 +25,7 @@
     <script>
         async function submitProtocol(protocol)
         {
-            if (protocol === 'oauth') {
-                window.location.href = "/redirect";
-            }
+            window.location.href = "/redirect?protocol=" + protocol;
         }
     </script>
 </x-guest-layout>

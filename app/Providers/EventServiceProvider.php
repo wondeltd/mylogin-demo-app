@@ -8,10 +8,13 @@ use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Slides\Saml2\Events\SignedIn;
+use Slides\Saml2\Events\SignedOut;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -46,6 +49,11 @@ class EventServiceProvider extends ServiceProvider
             auth()->login($user);
 
             session()->replace(['last_login_protocol' => SSOProtocol::SAML->value]);
+        });
+
+        Event::listen('Slides\Saml2\Events\SignedOut', function (SignedOut $event) {
+            Auth::logout();
+            Session::save();
         });
     }
 
