@@ -60,8 +60,7 @@ be https://mylogin-demo-app.test/callback
 
 ### Setup Tenant
 The first record in `saml_tenants` is used to POST a SAML Authentication Assertion. This can be created using the
-following command. You may need to update `loginUrl` if using this demo app locally, and you want to connect to a local
-instance of MyLogin
+following command. Change these options to match the MyLogin instance you are connecting to.
 
 ```shell
 php artisan saml2:create-tenant \
