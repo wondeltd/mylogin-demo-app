@@ -3,10 +3,14 @@ name: MyLogin-Demo-App
 environments:
   production:
     domain: demo-app.mylogin.com
-    database: demo-app-db
     memory: 1024
     cli-memory: 512
     runtime: 'php-8.1:al2'
+    subnets:
+      - subnet-009c2c6a40a2093b3
+      - subnet-0eae8afdb3143ad90
+    security-groups:
+      - sg-0ada19227dd64206d
     build:
       - 'composer dump-autoload --optimize'
       - 'npm ci && npm run build && rm -rf node_modules'
