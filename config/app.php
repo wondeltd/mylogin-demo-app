@@ -186,4 +186,5 @@ return [
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 
+    'run-internal-mylogin-development-seeder' => env('RUN_INTERNAL_MYLOGIN_DEVELOPMENT_SEEDER', false),
 ];
