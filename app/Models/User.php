@@ -25,6 +25,7 @@ class User extends Authenticatable
         'access_token',
         'refresh_token',
         'last_saml_assertion',
+        'auth_target_id',
     ];
 
     /**
