@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -48,4 +49,9 @@ class User extends Authenticatable
         'password' => 'hashed',
         'last_saml_assertion' => 'json',
     ];
+
+    public function authTarget(): BelongsTo
+    {
+        return $this->belongsTo(AuthTarget::class);
+    }
 }
