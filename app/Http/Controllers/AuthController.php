@@ -81,6 +81,7 @@ class AuthController extends Controller
 //
 //            $user = User::firstOrCreate([
 //                'mylogin_id' => $userResponse['data']['id'],
+//        'auth_target_id' => $authTarget->getKey(), TODO
 //            ], [
 //                'name' => $userResponse['data']['first_name'].' '.$userResponse['data']['last_name'],
 //                'email' => $userResponse['data']['email'],
@@ -102,8 +103,9 @@ class AuthController extends Controller
 //        return to_route('dashboard');
     }
 
-    public function logout(AuthTarget $authTarget, Request $request): RedirectResponse
+    public function logout(Request $request): RedirectResponse
     {
+        $authTarget = Auth::user()->authTarget;
         Auth::guard('web')->logout();
 
         if ($this->isSamlSession()) {
