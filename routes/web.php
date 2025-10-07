@@ -5,16 +5,24 @@ use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return to_route(auth()->check() ? 'dashboard' : 'login');
+    if (auth()->check()) {
+        return to_route('dashboard');
+    }
+
+    if ($firstAuthTarget = \App\Models\AuthTarget::first()) {
+        return to_route('login', ['auth_target' => $firstAuthTarget->slug]);
+    }
+
+    abort(503, 'No authentication targets configured');
 });
 
 Route::middleware('guest')->controller(AuthController::class)->group(function () {
-    Route::get('/login', 'loginPage')->name('login');
-    Route::get('/redirect', 'redirect')->name('redirect');
-    Route::get('/callback', 'callback')->name('callback');
+    Route::get('/{auth_target}/login', 'loginPage')->name('login');
+    Route::get('/{auth_target}/redirect', 'redirect')->name('redirect');
+    Route::get('/{auth_target}/callback', 'callback')->name('callback');
 });
 
 Route::middleware('auth')->group(function () {
-    Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+    Route::post('/{auth_target}/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
 });

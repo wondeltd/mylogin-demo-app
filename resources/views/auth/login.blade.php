@@ -25,7 +25,7 @@
     <script>
         async function submitProtocol(protocol)
         {
-            window.location.href = "/redirect?protocol=" + protocol;
+            window.location.href = "/{{ $authTarget->slug }}/redirect?protocol=" + protocol;
         }
     </script>
 </x-guest-layout>
