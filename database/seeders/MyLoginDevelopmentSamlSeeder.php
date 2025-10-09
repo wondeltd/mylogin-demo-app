@@ -21,9 +21,13 @@ class MyLoginDevelopmentSamlSeeder extends Seeder
         ]);
 
         AuthTarget::create([
-           'slug'            => 'local',
-           'name'            => 'Local',
-           'saml2_tenant_id' => $tenant->getKey(),
+            'slug'                => 'local',
+            'name'                => 'Local',
+            'saml2_tenant_id'     => $tenant->getKey(),
+            'oauth_client_id'     => config('services.mylogin.client_id'),
+            'oauth_client_secret' => config('services.mylogin.client_secret'),
+            'oauth_redirect_uri'  => config('services.mylogin.redirect_uri'),
+            'oauth_mylogin_url'   => config('services.mylogin.url'),
         ]);
     }
 }
