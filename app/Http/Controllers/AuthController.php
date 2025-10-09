@@ -15,13 +15,14 @@ use Illuminate\View\View;
 
 class AuthController extends Controller
 {
-    public function loginPage(AuthTarget $authTarget): View
+    public function loginPage(): View
     {
         $isLogoutRedirect = request()->has('is_logout_redirect');
+        $authTargets = AuthTarget::all();
 
         return view('auth.login')->with([
             'isLogoutRedirect' => $isLogoutRedirect,
-            'authTarget'       => $authTarget,
+            'authTargets'      => $authTargets,
         ]);
     }
 
@@ -69,7 +70,7 @@ class AuthController extends Controller
 
         if (! $response->ok() || empty($details['access_token'])) {
             logger()->info('auth failed', $details);
-            return to_route('login', ['auth_target' => $authTarget->slug]);
+            return to_route('login');
         }
 
         $userResponse = Http::withHeaders([
