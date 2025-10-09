@@ -52,55 +52,56 @@ class AuthController extends Controller
 
     public function callback(AuthTarget $authTarget, Request $request)
     {
-//        if (! $authTarget->hasOauth()) {
-//            abort(404, 'OAuth not configured for this authentication target');
-//        }
-//
-//        $response = Http::withHeaders([
-//            'Authorization' => 'Basic '.base64_encode($authTarget->oauth_client_id.':'.$authTarget->oauth_client_secret),
-//        ])
-//            ->post($authTarget->oauth_mylogin_url.'/oauth/token', [
-//                'grant_type' => 'authorization_code',
-//                'code' => $request->code,
-//                'redirect_uri' => $authTarget->oauth_redirect_uri,
-//            ]);
-//
-//        $details = $response->json();
-//
-//        if (! $response->ok() || empty($details['access_token'])) {
-//            return to_route('login', ['auth_target' => $authTarget->slug]);
-//        }
-//
-//        $userResponse = Http::withHeaders([
-//            'Authorization' => 'Bearer '.$details['access_token'],
-//        ])
-//            ->get($authTarget->oauth_mylogin_url.'/api/user')
-//            ->json();
-//
-//        if ($userResponse) {
-//
-//            $user = User::firstOrCreate([
-//                'mylogin_id' => $userResponse['data']['id'],
-//        'auth_target_id' => $authTarget->getKey(), TODO
-//            ], [
-//                'name' => $userResponse['data']['first_name'].' '.$userResponse['data']['last_name'],
-//                'email' => $userResponse['data']['email'],
-//                'password' => Hash::make(Str::random(48)),
-//            ]);
-//
-//            $user->update([
-//                'access_token' => $details['access_token'],
-//                'refresh_token' => $details['refresh_token'],
-//            ]);
-//
-//            auth()->login($user);
-//            session()->replace([
-//                'last_login_protocol' => SSOProtocol::OAuth->value,
-//                'auth_target_id' => $authTarget->id,
-//            ]);
-//        }
-//
-//        return to_route('dashboard');
+        if (! $authTarget->hasOauth()) {
+            abort(404, 'OAuth not configured for this authentication target');
+        }
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Basic '.base64_encode($authTarget->oauth_client_id.':'.$authTarget->oauth_client_secret),
+        ])
+            ->post($authTarget->oauth_mylogin_url.'/oauth/token', [
+                'grant_type'   => 'authorization_code',
+                'code'         => $request->code,
+                'redirect_uri' => $authTarget->oauth_redirect_uri,
+            ]);
+
+        $details = $response->json();
+
+        if (! $response->ok() || empty($details['access_token'])) {
+            logger()->info('auth failed', $details);
+            return to_route('login', ['auth_target' => $authTarget->slug]);
+        }
+
+        $userResponse = Http::withHeaders([
+            'Authorization' => 'Bearer '.$details['access_token'],
+        ])
+            ->get($authTarget->oauth_mylogin_url.'/api/user')
+            ->json();
+
+        if ($userResponse) {
+
+            $user = User::firstOrCreate([
+                'mylogin_id'     => $userResponse['data']['id'],
+                'auth_target_id' => $authTarget->getKey(),
+            ], [
+                'name'     => $userResponse['data']['first_name'].' '.$userResponse['data']['last_name'],
+                'email'    => $userResponse['data']['email'],
+                'password' => Hash::make(Str::random(48)),
+            ]);
+
+            $user->update([
+                'access_token'  => $details['access_token'],
+                'refresh_token' => $details['refresh_token'],
+            ]);
+
+            auth()->login($user);
+            session()->replace([
+                'last_login_protocol' => SSOProtocol::OAuth->value,
+                'auth_target_id'      => $authTarget->id,
+            ]);
+        }
+
+        return to_route('dashboard');
     }
 
     public function logout(Request $request): RedirectResponse
