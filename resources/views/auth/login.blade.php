@@ -1,19 +1,21 @@
 <x-guest-layout>
-    <div class="text-center p-4" x-data="{ protocol: 'oauth', authTarget: '' }" >
+    <div class="text-center p-4" x-data="{ protocol: 'oauth', authTarget: '{{ $authTargets->first()?->slug ?? '' }}' }" >
 
-        <div class="w-full mb-6">
-            <label for="auth_target" class="block text-sm font-medium text-gray-700 mb-2">Select Authentication Target</label>
-            <select
-                id="auth_target"
-                x-model="authTarget"
-                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-mylogin-green-dark focus:ring-mylogin-green-dark"
-                required
-            >
-                <option value="">Choose an auth target...</option>
-                @foreach($authTargets as $target)
-                    <option value="{{ $target->slug }}">{{ $target->name }}</option>
-                @endforeach
-            </select>
+        <div class="grid w-full place-items-center pb-6">
+            <div class="w-full max-w-sm">
+                <label for="auth_target" class="block text-sm font-medium text-gray-700 mb-3 text-center">Select Authentication Target</label>
+                <select
+                    id="auth_target"
+                    x-model="authTarget"
+                    class="block w-full rounded-xl bg-gray-200 px-4 py-3 text-center font-medium text-gray-700 border-0 focus:bg-white focus:ring-2 focus:ring-mylogin-green-dark appearance-none cursor-pointer"
+                    required
+                >
+                    <option value="">Choose an auth target...</option>
+                    @foreach($authTargets as $target)
+                        <option value="{{ $target->slug }}">{{ $target->name }}</option>
+                    @endforeach
+                </select>
+            </div>
         </div>
 
         <div class="grid w-full place-items-center pb-6">
