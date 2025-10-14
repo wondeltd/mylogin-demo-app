@@ -5,13 +5,17 @@ use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return to_route(auth()->check() ? 'dashboard' : 'login');
+    if (auth()->check()) {
+        return to_route('dashboard');
+    }
+
+    return to_route('login');
 });
 
 Route::middleware('guest')->controller(AuthController::class)->group(function () {
     Route::get('/login', 'loginPage')->name('login');
-    Route::get('/redirect', 'redirect')->name('redirect');
-    Route::get('/callback', 'callback')->name('callback');
+    Route::get('/{auth_target}/redirect', 'redirect')->name('redirect');
+    Route::get('/{auth_target}/callback', 'callback')->name('callback');
 });
 
 Route::middleware('auth')->group(function () {

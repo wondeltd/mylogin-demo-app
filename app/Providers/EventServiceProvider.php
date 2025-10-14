@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Enums\ClaimTypes;
 use App\Enums\SSOProtocol;
+use App\Models\AuthTarget;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -36,13 +37,16 @@ class EventServiceProvider extends ServiceProvider
     {
         Event::listen(SignedIn::class, function (SignedIn $event) {
             $samlUser = $event->getSaml2User();
+            $samlTenant = $samlUser->getTenant();
+            $authTarget = AuthTarget::where('saml2_tenant_id', $samlTenant->getKey())->first();
 
             $user = User::updateOrCreate([
-                'mylogin_id' => $samlUser->getAttribute(ClaimTypes::MyLoginID->value)[0],
+                'mylogin_id'     => $samlUser->getAttribute(ClaimTypes::MyLoginID->value)[0],
+                'auth_target_id' => $authTarget->getKey(),
             ], [
-                'name' => "{$samlUser->getAttribute(ClaimTypes::FirstName->value)[0]} {$samlUser->getAttribute(ClaimTypes::LastName->value)[0]}",
-                'email' => $samlUser->getAttribute(ClaimTypes::EmailAddress->value)[0],
-                'password' => Hash::make(Str::random()),
+                'name'                => "{$samlUser->getAttribute(ClaimTypes::FirstName->value)[0]} {$samlUser->getAttribute(ClaimTypes::LastName->value)[0]}",
+                'email'               => $samlUser->getAttribute(ClaimTypes::EmailAddress->value)[0],
+                'password'            => Hash::make(Str::random()),
                 'last_saml_assertion' => $samlUser->getAttributes(),
             ]);
 
