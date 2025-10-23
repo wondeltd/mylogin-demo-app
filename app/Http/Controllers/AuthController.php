@@ -69,38 +69,61 @@ class AuthController extends Controller
         $details = $response->json();
 
         if (! $response->ok() || empty($details['access_token'])) {
-            logger()->info('auth failed', $details);
+            logger()->error('MyLogin OAuth token exchange failed', [
+                'status'       => $response->status(),
+                'body'         => $response->body(),
+                'details'      => $details,
+                'authTargetId' => $authTarget->getKey(),
+            ]);
+
             return to_route('login');
         }
 
         $userResponse = Http::withHeaders([
             'Authorization' => 'Bearer '.$details['access_token'],
         ])
-            ->get($authTarget->oauth_mylogin_url.'/api/user')
-            ->json();
+            ->get($authTarget->oauth_mylogin_url.'/api/user');
 
-        if ($userResponse) {
-
-            $user = User::firstOrCreate([
-                'mylogin_id'     => $userResponse['data']['id'],
-                'auth_target_id' => $authTarget->getKey(),
-            ], [
-                'name'     => $userResponse['data']['first_name'].' '.$userResponse['data']['last_name'],
-                'email'    => $userResponse['data']['email'],
-                'password' => Hash::make(Str::random(48)),
+        if ($userResponse->failed()) {
+            logger()->error('MyLogin OAuth user fetch failed during callback', [
+                'status'       => $userResponse->status(),
+                'body'         => $userResponse->body(),
+                'authTargetId' => $authTarget->getKey(),
             ]);
 
-            $user->update([
-                'access_token'  => $details['access_token'],
-                'refresh_token' => $details['refresh_token'],
-            ]);
-
-            auth()->login($user);
-            session()->replace([
-                'last_login_protocol' => SSOProtocol::OAuth->value,
-                'auth_target_id'      => $authTarget->id,
-            ]);
+            return to_route('login');
         }
+
+        $userData = $userResponse->json();
+
+        if (! isset($userData['data'])) {
+            logger()->error('MyLogin OAuth user response missing data key during callback', [
+                'response'     => $userData,
+                'authTargetId' => $authTarget->getKey(),
+            ]);
+
+            return to_route('login');
+        }
+
+        $user = User::firstOrCreate([
+            'mylogin_id'     => $userData['data']['id'],
+            'auth_target_id' => $authTarget->getKey(),
+        ], [
+            'name'     => $userData['data']['first_name'].' '.$userData['data']['last_name'],
+            'email'    => $userData['data']['email'],
+            'password' => Hash::make(Str::random(48)),
+        ]);
+
+        $user->update([
+            'access_token'  => $details['access_token'],
+            'refresh_token' => $details['refresh_token'],
+        ]);
+
+        auth()->login($user);
+        session()->replace([
+            'last_login_protocol' => SSOProtocol::OAuth->value,
+            'auth_target_id'      => $authTarget->id,
+        ]);
 
         return to_route('dashboard');
     }
