@@ -26,7 +26,7 @@ class DashboardController extends Controller
         $response = Http::withHeaders([
             'Authorization' => 'Bearer '.auth()->user()->access_token,
         ])
-            ->get(config('services.mylogin.url').'/api/user');
+            ->get(auth()->user()->authTarget->oauth_mylogin_url.'/api/user');
 
         if ($response->failed()) {
             logger()->error('MyLogin OAuth API request failed', [

@@ -141,7 +141,7 @@ class AuthController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect()->away(config('services.mylogin.url').'/oauth/logout?client_id='.config('services.mylogin.client_id'));
+        return redirect()->away($authTarget->oauth_mylogin_url.'/oauth/logout?client_id='.$authTarget->oauth_client_id);
     }
 
     private function isSamlSession(): bool
