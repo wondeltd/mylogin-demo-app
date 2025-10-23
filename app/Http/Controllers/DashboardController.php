@@ -26,13 +26,33 @@ class DashboardController extends Controller
         $response = Http::withHeaders([
             'Authorization' => 'Bearer '.auth()->user()->access_token,
         ])
-            ->get(config('services.mylogin.url').'/api/user')
-            ->json();
+            ->get(config('services.mylogin.url').'/api/user');
+
+        if ($response->failed()) {
+            logger()->error('MyLogin OAuth API request failed', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+                'userId' => auth()->id(),
+            ]);
+
+            abort(401, 'Failed to fetch user details from MyLogin API');
+        }
+
+        $data = $response->json();
+
+        if (! isset($data['data'])) {
+            logger()->error('MyLogin OAuth API returned invalid response structure', [
+                'response' => $data,
+                'userId' => auth()->id(),
+            ]);
+
+            abort(500, 'Invalid response structure from MyLogin API');
+        }
 
         return [
-            'name' => "{$response['data']['first_name']} {$response['data']['last_name']}",
+            'name' => "{$data['data']['first_name']} {$data['data']['last_name']}",
             'method' => SSOProtocol::OAuth,
-            'content' => $response,
+            'content' => $data,
         ];
     }
 
