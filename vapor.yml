@@ -10,7 +10,7 @@ environments:
       - subnet-009c2c6a40a2093b3
       - subnet-0eae8afdb3143ad90
     security-groups:
-      - sg-0ada19227dd64206d
+      - sg-0148518792fedc937
     build:
       - 'composer dump-autoload --optimize'
       - 'npm ci && npm run build && rm -rf node_modules'
