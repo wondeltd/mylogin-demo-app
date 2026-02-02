@@ -40,10 +40,14 @@ class AuthController extends Controller
             abort(404, 'OAuth not configured for this authentication target');
         }
 
+        $state = Str::random(40);
+        session()->put('oauth_state', $state);
+
         $query = http_build_query([
             'client_id'     => $authTarget->oauth_client_id,
             'redirect_uri'  => $authTarget->oauth_redirect_uri,
             'response_type' => 'code',
+            'state'         => $state,
         ]);
 
         $url = $authTarget->oauth_mylogin_url.'/oauth/authorize?'.$query;
@@ -55,6 +59,15 @@ class AuthController extends Controller
     {
         if (! $authTarget->hasOauth()) {
             abort(404, 'OAuth not configured for this authentication target');
+        }
+
+        $expectedState = session()->pull('oauth_state');
+
+        if (! $request->has('state') || $request->get('state') !== $expectedState) {
+            return to_route('redirect', [
+                'auth_target' => $authTarget,
+                'protocol'    => SSOProtocol::OAuth->value,
+            ]);
         }
 
         $response = Http::withHeaders([
