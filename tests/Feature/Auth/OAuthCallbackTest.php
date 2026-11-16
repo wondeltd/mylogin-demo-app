@@ -25,7 +25,7 @@ function fakeMyLoginUser(): array
 beforeEach(fn () => Http::preventStrayRequests());
 
 it('logs in the MyLogin user and lands on the dashboard', function () {
-    $target = AuthTarget::factory()->create();
+    $target = AuthTarget::factory()->create(['oauth_client_id' => 'client-1', 'oauth_client_secret' => 'secret-1']);
     Http::fake([
         'https://mylogin.test/oauth/token' => Http::response(['access_token' => 'access-123', 'refresh_token' => 'refresh-456']),
         ...fakeMyLoginUser(),
@@ -35,8 +35,20 @@ it('logs in the MyLogin user and lands on the dashboard', function () {
     $this->get("/{$target->slug}/callback?state={$state}&code=the-code")
         ->assertRedirect(route('dashboard'));
 
+    Http::assertSent(fn ($request) => $request->url() === 'https://mylogin.test/oauth/token'
+        && $request->hasHeader('Authorization', 'Basic Y2xpZW50LTE6c2VjcmV0LTE=')
+        && $request['grant_type'] === 'authorization_code'
+        && $request['code'] === 'the-code'
+        && $request['redirect_uri'] === 'https://demo-app.test/callback');
+    Http::assertSent(fn ($request) => $request->url() === 'https://mylogin.test/api/user'
+        && $request->hasHeader('Authorization', 'Bearer access-123'));
+
     $user = User::where('mylogin_id', 'ML-42')->sole();
-    expect($user->auth_target_id)->toBe($target->id);
+    expect($user->auth_target_id)->toBe($target->id)
+        ->and($user->name)->toBe('Ada Lovelace')
+        ->and($user->email)->toBe('ada@example.com')
+        ->and($user->access_token)->toBe('access-123')
+        ->and($user->refresh_token)->toBe('refresh-456');
     $this->assertAuthenticatedAs($user);
     expect(session('last_login_protocol'))->toBe('o_auth');
 });

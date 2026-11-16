@@ -26,7 +26,10 @@ it('logs in the asserted user', function () {
     event(new SignedIn($samlUser, Mockery::mock(Auth::class)));
 
     $user = User::where('mylogin_id', 'ML-7')->sole();
-    expect($user->auth_target_id)->toBe($target->id);
+    expect($user->auth_target_id)->toBe($target->id)
+        ->and($user->name)->toBe('Grace Hopper')
+        ->and($user->email)->toBe('grace@example.com')
+        ->and($user->last_saml_assertion)->toBe($claims);
     $this->assertAuthenticatedAs($user);
     expect(session('last_login_protocol'))->toBe('saml');
 });
