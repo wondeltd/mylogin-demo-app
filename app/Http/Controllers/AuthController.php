@@ -62,8 +62,9 @@ class AuthController extends Controller
         }
 
         $expectedState = session()->pull('oauth_state');
+        $state = $request->query('state');
 
-        if (! $request->has('state') || $request->get('state') !== $expectedState) {
+        if (! is_string($expectedState) || ! is_string($state) || ! hash_equals($expectedState, $state)) {
             return to_route('redirect', [
                 'auth_target' => $authTarget,
                 'protocol'    => SSOProtocol::OAuth->value,
