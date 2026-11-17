@@ -78,3 +78,27 @@ it('returns to login when the token exchange fails', function () {
 
     $this->assertGuest();
 });
+
+it('restarts the flow unless the state matches one this session started', function (bool $flowStarted, string $query) {
+    $target = AuthTarget::factory()->create();
+    Http::fake([
+        'https://mylogin.test/oauth/token' => Http::response(['access_token' => 'access-123', 'refresh_token' => 'refresh-456']),
+        ...fakeMyLoginUser(),
+    ]);
+    if ($flowStarted) {
+        startOAuthFlow($target);
+        Http::assertNothingSent();
+    }
+
+    $this->get("/{$target->slug}/callback?{$query}")
+        ->assertRedirect(route('redirect', ['auth_target' => $target, 'protocol' => 'o_auth']));
+
+    $this->assertGuest();
+    Http::assertNothingSent();
+})->with([
+    'no flow, empty state'        => [false, 'state=&code=attacker-code'],
+    'no flow, no state'           => [false, 'code=attacker-code'],
+    'no flow, guessed state'      => [false, 'state=guess&code=attacker-code'],
+    'flow started, empty state'   => [true, 'state=&code=attacker-code'],
+    'flow started, array state'   => [true, 'state[]=x&code=attacker-code'],
+]);

@@ -9,13 +9,13 @@
     "license": "MIT",
     "require": {
         "php": "^8.5",
-        "24slides/laravel-saml2": "dev-2.5.x-add-l13-support#ecb65cf03d34682744dbe68e1013db242c04630b as 2.5.2",
         "bugsnag/bugsnag-laravel": "^2.31",
         "guzzlehttp/guzzle": "^7.7",
         "laravel/framework": "^13.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0",
-        "laravel/vapor-core": "^2.47"
+        "laravel/vapor-core": "^2.47",
+        "scaler-tech/laravel-saml2": "^2.7.2"
     },
     "require-dev": {
         "fakerphp/faker": "^1.24",
